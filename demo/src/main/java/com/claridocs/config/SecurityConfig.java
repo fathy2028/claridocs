@@ -37,18 +37,18 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // @Bean
-    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    //     http
-    //             .csrf(csrf -> csrf.disable())
-    //             .authorizeHttpRequests(auth -> auth
-    //                     .anyRequest().permitAll()    
-    //             )
-    //             .formLogin(form -> form.disable())
-    //             .httpBasic(basic -> basic.disable());
+     @Bean
+     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+         http
+                 .csrf(csrf -> csrf.disable())
+                 .authorizeHttpRequests(auth -> auth
+                         .anyRequest().permitAll()    
+                 )
+                 .formLogin(form -> form.disable())
+                 .httpBasic(basic -> basic.disable());
 
-    //     return http.build();
-    // }
+         return http.build();
+     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
