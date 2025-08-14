@@ -1,6 +1,7 @@
 package com.claridocs.controller;
 
 import com.claridocs.domain.Employee;
+import com.claridocs.dto.EmployeeDto;
 import com.claridocs.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public List<Employee> getAll() {
+    public List<EmployeeDto> getAll() {
         return employeeService.getAllEmployees();
     }
 

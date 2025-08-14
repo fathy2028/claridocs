@@ -1,6 +1,7 @@
 package com.claridocs.service;
 
 import com.claridocs.domain.Employee;
+import com.claridocs.dto.EmployeeDto;
 import com.claridocs.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,28 +22,36 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    public List<EmployeeDto> getAllEmployees() {
+        return employeeRepository.findAll()
+                .stream()
+                .map(emp -> new EmployeeDto(
+                        emp.getId(),
+                        emp.getUser().getId(),
+                        emp.getDepartment().getId(),
+                        emp.getDateJoined(),
+                        emp.getPhone()))
+                .toList();
     }
 
     @Override
-public Optional<Employee> getEmployeeById(UUID id) {
-    return employeeRepository.findById(id);
-}
+    public Optional<Employee> getEmployeeById(UUID id) {
+        return employeeRepository.findById(id);
+    }
 
-@Override
-public Employee updateEmployee(UUID id, Employee updated) {
-    return employeeRepository.findById(id).map(emp -> {
-        emp.setPhone(updated.getPhone());
-        emp.setDateJoined(updated.getDateJoined());
-        emp.setDepartment(updated.getDepartment());
-        emp.setUser(updated.getUser());
-        return employeeRepository.save(emp);
-    }).orElse(null);
-}
+    @Override
+    public Employee updateEmployee(UUID id, Employee updated) {
+        return employeeRepository.findById(id).map(emp -> {
+            emp.setPhone(updated.getPhone());
+            emp.setDateJoined(updated.getDateJoined());
+            emp.setDepartment(updated.getDepartment());
+            emp.setUser(updated.getUser());
+            return employeeRepository.save(emp);
+        }).orElse(null);
+    }
 
-@Override
-public void deleteEmployee(UUID id) {
-    employeeRepository.deleteById(id);
-}
+    @Override
+    public void deleteEmployee(UUID id) {
+        employeeRepository.deleteById(id);
+    }
 }
