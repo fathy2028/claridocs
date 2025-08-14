@@ -12,6 +12,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, UUID> {
     Page<Document> findByEmployeeId(UUID employeeId, Pageable pageable);
+
     List<Document> findByEmployeeIdAndType(UUID employeeId, DocumentType type);
+
+    Page<Document> findByEmployeeIdAndType(UUID employeeId, DocumentType type, Pageable pageable);
+
     long countByEmployee_Department_Id(UUID departmentId);
 }

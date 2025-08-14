@@ -54,4 +54,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void deleteEmployee(UUID id) {
         employeeRepository.deleteById(id);
     }
+
+    @Override
+    public List<EmployeeDto> getEmployeesByDepartment(UUID departmentId) {
+        return employeeRepository.findByDepartmentId(departmentId, null)
+                .getContent()
+                .stream()
+                .map(emp -> new EmployeeDto(
+                        emp.getId(),
+                        emp.getUser().getId(),
+                        emp.getDepartment().getId(),
+                        emp.getDateJoined(),
+                        emp.getPhone()))
+                .toList();
+    }
 }

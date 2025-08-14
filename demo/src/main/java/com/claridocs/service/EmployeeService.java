@@ -15,4 +15,5 @@ public interface EmployeeService {
     Optional<Employee> getEmployeeById(UUID id);
     Employee updateEmployee(UUID id, Employee employee);
     void deleteEmployee(UUID id);
+    List<EmployeeDto> getEmployeesByDepartment(UUID departmentId);
 }

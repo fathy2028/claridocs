@@ -6,6 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
+import java.util.UUID;
 
 public class SecurityUser implements UserDetails {
     private final User user;
@@ -20,20 +21,40 @@ public class SecurityUser implements UserDetails {
     }
 
     @Override
-    public String getPassword() { return user.getPasswordHash(); }
+    public String getPassword() {
+        return user.getPasswordHash();
+    }
 
     @Override
-    public String getUsername() { return user.getEmail(); }
+    public String getUsername() {
+        return user.getEmail();
+    }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return user.isActive(); }
+    public boolean isEnabled() {
+        return user.isActive();
+    }
+
+    public UUID getId() {
+        return user.getId();
+    }
+
+    public com.claridocs.domain.Role getRole() {
+        return user.getRole();
+    }
 }

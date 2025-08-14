@@ -11,5 +11,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     Page<Employee> findByDepartmentId(UUID departmentId, Pageable pageable);
+
     Optional<Employee> findByUserId(UUID userId);
+
+    long countByDepartmentId(UUID departmentId);
 }
