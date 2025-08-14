@@ -4,6 +4,10 @@ spring:
     username: ${DB_USER:fathy}
     password: ${DB_PASSWORD:2028}
     driver-class-name: org.postgresql.Driver
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
   jpa:
     hibernate:
       ddl-auto: update   # for dev; switch to 'validate' in prod
