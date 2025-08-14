@@ -11,6 +11,10 @@ import lombok.*;
        uniqueConstraints = @UniqueConstraint(name = "uq_users_email", columnNames = "email"))
 public class User extends BaseEntity {
 
+    @NotBlank
+    @Column(nullable = false, length = 100)
+    private String name;
+
     @Email @NotBlank
     @Column(nullable = false, length = 150)
     private String email;
