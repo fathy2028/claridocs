@@ -37,23 +37,10 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // @Bean
-    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    //     http
-    //             .csrf(csrf -> csrf.disable())
-    //             .authorizeHttpRequests(auth -> auth
-    //                     .anyRequest().permitAll()    
-    //             )
-    //             .formLogin(form -> form.disable())
-    //             .httpBasic(basic -> basic.disable());
-
-    //     return http.build();
-    // }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
-    .csrf(csrf -> csrf.disable()) // disable CSRF for REST
+    .csrf(csrf -> csrf.disable()) 
     .authorizeHttpRequests(auth -> auth
     .requestMatchers("/login", "/logout", "/error").permitAll()
     .requestMatchers("/departments/**", "/employees/**",
@@ -61,8 +48,8 @@ public class SecurityConfig {
     .requestMatchers("/documents/**").hasAnyRole("ADMIN", "EMPLOYEE")
     .anyRequest().authenticated()
     )
-    .formLogin(form -> form.disable()) // disable default login form
-    .httpBasic(basic -> basic.disable()); // disable HTTP Basic auth
+    .formLogin(form -> form.disable()) 
+    .httpBasic(basic -> basic.disable()); 
 
     return http.build();
     }
