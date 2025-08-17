@@ -1,38 +1,42 @@
 package com.claridocs.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PastOrPresent;
+
 import lombok.*;
 
-import java.time.LocalDate;
+import org.hibernate.annotations.GenericGenerator;
 
-@Getter @Setter @NoArgsConstructor
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
 @Entity
 @Table(name = "employees")
-public class Employee extends BaseEntity {
-
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true,
-                foreignKey = @ForeignKey(name = "fk_employee_user"))
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Employee {
+    
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
+    
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
-
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id", nullable = false,
-                foreignKey = @ForeignKey(name = "fk_employee_department"))
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", referencedColumnName = "id", nullable = false)
     private Department department;
-
-    @NotBlank
-    @Column(nullable = false, length = 150)
-    private String fullName;
-
-    @Column(length = 30)
+    
+    @Column(name = "date_joined", nullable = false)
+    private LocalDate dateJoined;
+    
+    @Column(name = "phone", length = 15)
     private String phone;
-
-    @PastOrPresent
-    @Column(nullable = false)
-    private LocalDate dateJoined = LocalDate.now();
-
-    @Column(length = 120)
-    private String title;
+    
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Document> documents;
 }

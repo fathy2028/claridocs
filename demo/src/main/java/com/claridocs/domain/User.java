@@ -1,32 +1,52 @@
 package com.claridocs.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
-@Getter @Setter @NoArgsConstructor
 @Entity
-@Table(name = "users",
-       uniqueConstraints = @UniqueConstraint(name = "uq_users_email", columnNames = "email"))
-public class User extends BaseEntity {
+@Table(name = "users")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
 
-    @NotBlank
-    @Column(nullable = false, length = 100)
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
+
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Email @NotBlank
-    @Column(nullable = false, length = 150)
+    @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @NotBlank
-    @Column(nullable = false, length = 255)
-    private String passwordHash;
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private Role role = Role.EMPLOYEE;
+    @Column(name = "role", nullable = false)
+    private Role role;
 
-    @Column(nullable = false)
-    private boolean active = true;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "active", nullable = false)
+    private Boolean active = true;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
+    public enum Role {
+        ADMIN, EMPLOYEE
+    }
 }

@@ -1,42 +1,70 @@
 package com.claridocs.controller;
 
-import com.claridocs.dto.LoginRequest;
-import jakarta.servlet.http.HttpServletRequest;
+import com.claridocs.domain.User;
+import com.claridocs.service.UserService;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@RestController
+
+import java.util.Optional;
+
+@Controller
+@RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
-
-    private final AuthenticationManager authManager;
-
-    public AuthController(AuthenticationManager authManager) {
-        this.authManager = authManager;
-    }
-
-    @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-        Authentication authentication = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-        // Create session after successful authentication
-        HttpSession session = httpRequest.getSession(true);
-        session.setAttribute("SPRING_SECURITY_CONTEXT", authentication);
-        return "Logged in as " + authentication.getName();
-    }
-
-    @PostMapping("/logout")
-    public String logout(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
+    
+    private final UserService userService;
+    
+    @GetMapping("/login")
+    public String loginPage(Model model, HttpSession session) {
+        // Redirect to dashboard if already logged in
+        if (session.getAttribute("user") != null) {
+            User user = (User) session.getAttribute("user");
+            return user.getRole() == User.Role.ADMIN ? "redirect:/admin/dashboard" : "redirect:/employee/dashboard";
         }
-        return "Logged out";
+        return "auth/login";
+    }
+    
+    @PostMapping("/login")
+    public String login(@RequestParam String email, 
+                       @RequestParam String password, 
+                       HttpSession session, 
+                       RedirectAttributes redirectAttributes) {
+        
+        Optional<User> userOpt = userService.authenticateUser(email, password);
+        
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            session.setAttribute("user", user);
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("userRole", user.getRole());
+            
+            // Redirect based on role
+            if (user.getRole() == User.Role.ADMIN) {
+                return "redirect:/admin/dashboard";
+            } else {
+                return "redirect:/employee/dashboard";
+            }
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Invalid email or password");
+            return "redirect:/auth/login";
+        }
+    }
+    
+    @GetMapping("/logout")
+    @PostMapping("/logout")
+    public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
+        session.invalidate();
+        redirectAttributes.addFlashAttribute("message", "You have been successfully logged out");
+        return "redirect:/auth/login";
+    }
+    
+    @GetMapping("/")
+    public String redirectToLogin() {
+        return "redirect:/auth/login";
     }
 }

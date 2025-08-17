@@ -7,18 +7,23 @@ import lombok.*;
 
 import java.time.Instant;
 
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "documents", indexes = {
-    @Index(name = "idx_docs_employee", columnList = "employee_id"),
-    @Index(name = "idx_docs_type", columnList = "type")
+        @Index(name = "idx_docs_employee", columnList = "employee_id"),
+        @Index(name = "idx_docs_type", columnList = "type")
 })
 public class Document extends BaseEntity {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", nullable = false,
-                foreignKey = @ForeignKey(name = "fk_document_employee"))
+    @JoinColumn(name = "employee_id", nullable = false, foreignKey = @ForeignKey(name = "fk_document_employee"))
     private Employee employee;
+
+    @NotBlank
+    @Column(nullable = false, length = 255)
+    private String title;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -38,7 +43,7 @@ public class Document extends BaseEntity {
 
     @NotBlank
     @Column(nullable = false, length = 512)
-    private String storageKey;     // path or object key
+    private String storageKey; // path or object key
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -52,5 +57,9 @@ public class Document extends BaseEntity {
 
     private Instant uploadedAt = Instant.now();
 
-    private Instant deletedAt;     // soft delete
+    private Instant deletedAt; // soft delete
+
+    public enum DocumentType {
+        CONTRACT, PAYSLIP, ID, OTHER
+    }
 }

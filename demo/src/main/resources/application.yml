@@ -11,7 +11,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update # for dev; switch to 'validate' in prod
-    open-in-view: false
+    open-in-view: true
     properties:
       hibernate:
         format_sql: true

@@ -12,57 +12,53 @@ public class EntityTest {
     @Test
     public void testUserEntity() {
         User user = new User();
+        user.setName("Test User");
         user.setEmail("test@example.com");
-        user.setPasswordHash("hashedpassword");
-        user.setRole(Role.EMPLOYEE);
-        user.setActive(true);
+        user.setPassword("hashedpassword");
+        user.setRole(User.Role.EMPLOYEE);
 
+        assertThat(user.getName()).isEqualTo("Test User");
         assertThat(user.getEmail()).isEqualTo("test@example.com");
-        assertThat(user.getPasswordHash()).isEqualTo("hashedpassword");
-        assertThat(user.getRole()).isEqualTo(Role.EMPLOYEE);
-        assertThat(user.isActive()).isTrue();
+        assertThat(user.getPassword()).isEqualTo("hashedpassword");
+        assertThat(user.getRole()).isEqualTo(User.Role.EMPLOYEE);
     }
 
     @Test
     public void testDepartmentEntity() {
         Department department = new Department();
         department.setName("Engineering");
-        department.setDescription("Software Engineering Department");
 
         assertThat(department.getName()).isEqualTo("Engineering");
-        assertThat(department.getDescription()).isEqualTo("Software Engineering Department");
     }
 
     @Test
     public void testEmployeeEntity() {
         User user = new User();
+        user.setName("Employee User");
         user.setEmail("employee@example.com");
-        user.setPasswordHash("hashedpassword");
+        user.setPassword("hashedpassword");
 
         Department department = new Department();
         department.setName("HR");
-        department.setDescription("Human Resources");
 
         Employee employee = new Employee();
         employee.setUser(user);
         employee.setDepartment(department);
-        employee.setFullName("John Doe");
         employee.setPhone("123-456-7890");
         employee.setDateJoined(LocalDate.now());
-        employee.setTitle("Software Engineer");
 
         assertThat(employee.getUser()).isEqualTo(user);
         assertThat(employee.getDepartment()).isEqualTo(department);
-        assertThat(employee.getFullName()).isEqualTo("John Doe");
         assertThat(employee.getPhone()).isEqualTo("123-456-7890");
-        assertThat(employee.getTitle()).isEqualTo("Software Engineer");
+        assertThat(employee.getDateJoined()).isNotNull();
     }
 
     @Test
     public void testDocumentEntity() {
         User user = new User();
+        user.setName("Doc User");
         user.setEmail("doc@example.com");
-        user.setPasswordHash("hashedpassword");
+        user.setPassword("hashedpassword");
 
         Department department = new Department();
         department.setName("Finance");
@@ -70,12 +66,12 @@ public class EntityTest {
         Employee employee = new Employee();
         employee.setUser(user);
         employee.setDepartment(department);
-        employee.setFullName("Jane Smith");
         employee.setDateJoined(LocalDate.now());
 
         Document document = new Document();
         document.setEmployee(employee);
-        document.setType(DocumentType.CONTRACT);
+        document.setType(Document.DocumentType.CONTRACT);
+        document.setTitle("Employment Contract");
         document.setOriginalFilename("contract.pdf");
         document.setMimeType("application/pdf");
         document.setSizeBytes(1024L);
@@ -86,7 +82,8 @@ public class EntityTest {
         document.setUploadedAt(Instant.now());
 
         assertThat(document.getEmployee()).isEqualTo(employee);
-        assertThat(document.getType()).isEqualTo(DocumentType.CONTRACT);
+        assertThat(document.getType()).isEqualTo(Document.DocumentType.CONTRACT);
+        assertThat(document.getTitle()).isEqualTo("Employment Contract");
         assertThat(document.getOriginalFilename()).isEqualTo("contract.pdf");
         assertThat(document.getMimeType()).isEqualTo("application/pdf");
         assertThat(document.getSizeBytes()).isEqualTo(1024L);
@@ -99,8 +96,10 @@ public class EntityTest {
 
     @Test
     public void testEnums() {
-        assertThat(Role.values()).containsExactly(Role.ADMIN, Role.EMPLOYEE);
-        assertThat(DocumentType.values()).containsExactly(DocumentType.CONTRACT, DocumentType.PAYSLIP, DocumentType.ID, DocumentType.OTHER);
-        assertThat(StorageProvider.values()).containsExactly(StorageProvider.LOCAL, StorageProvider.S3, StorageProvider.GCS, StorageProvider.MINIO);
+        assertThat(User.Role.values()).containsExactly(User.Role.ADMIN, User.Role.EMPLOYEE);
+        assertThat(Document.DocumentType.values()).containsExactly(Document.DocumentType.CONTRACT,
+                Document.DocumentType.PAYSLIP, Document.DocumentType.ID, Document.DocumentType.OTHER);
+        assertThat(StorageProvider.values()).containsExactly(StorageProvider.LOCAL, StorageProvider.S3,
+                StorageProvider.GCS, StorageProvider.MINIO);
     }
 }
