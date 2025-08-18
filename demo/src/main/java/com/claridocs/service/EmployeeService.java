@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,6 +55,15 @@ public class EmployeeService {
 
     public List<Employee> searchEmployeesByName(String name) {
         return employeeRepository.findByNameContaining(name);
+    }
+
+    public List<Employee> getEmployeesByDateJoined(String dateJoined) {
+        try {
+            LocalDate date = LocalDate.parse(dateJoined);
+            return employeeRepository.findByDateJoinedAfter(date);
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     public List<Employee> searchEmployeesByDepartment(String departmentName) {

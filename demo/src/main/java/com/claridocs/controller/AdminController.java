@@ -133,7 +133,8 @@ public class AdminController {
     @Transactional(readOnly = true)
     public String listEmployees(Model model, HttpSession session,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) UUID departmentId) {
+            @RequestParam(required = false) UUID departmentId,
+            @RequestParam(required = false) String dateJoined) {
         if (!isAdmin(session)) {
             return "redirect:/auth/login";
         }
@@ -143,14 +144,36 @@ public class AdminController {
             employees = employeeService.searchEmployeesByName(search);
         } else if (departmentId != null) {
             employees = employeeService.getEmployeesByDepartment(departmentId);
+        } else if (dateJoined != null && !dateJoined.isEmpty()) {
+            employees = employeeService.getEmployeesByDateJoined(dateJoined);
         } else {
             employees = employeeService.getAllEmployees();
+        }
+
+        // Apply additional filters if multiple criteria are provided
+        if (employees != null && !employees.isEmpty()) {
+            if (search != null && !search.isEmpty() && departmentId != null) {
+                employees = employees.stream()
+                        .filter(emp -> emp.getDepartment().getId().equals(departmentId))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+            if (search != null && !search.isEmpty() && dateJoined != null && !dateJoined.isEmpty()) {
+                employees = employees.stream()
+                        .filter(emp -> emp.getDateJoined().toString().equals(dateJoined))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+            if (departmentId != null && dateJoined != null && !dateJoined.isEmpty()) {
+                employees = employees.stream()
+                        .filter(emp -> emp.getDateJoined().toString().equals(dateJoined))
+                        .collect(java.util.stream.Collectors.toList());
+            }
         }
 
         model.addAttribute("employees", employees);
         model.addAttribute("departments", departmentService.getAllDepartments());
         model.addAttribute("search", search);
         model.addAttribute("selectedDepartmentId", departmentId);
+        model.addAttribute("dateJoined", dateJoined);
 
         return "admin/employees";
     }
@@ -289,7 +312,8 @@ public class AdminController {
     @Transactional(readOnly = true)
     public String listDocuments(Model model, HttpSession session,
             @RequestParam(required = false) UUID employeeId,
-            @RequestParam(required = false) String type) {
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String uploadDate) {
         if (!isAdmin(session)) {
             return "redirect:/auth/login";
         }
@@ -298,9 +322,37 @@ public class AdminController {
         if (employeeId != null) {
             documents = documentService.getDocumentsByEmployeeId(employeeId);
         } else if (type != null && !type.isEmpty()) {
-            documents = documentService.getDocumentsByType(Document.DocumentType.valueOf(type.toUpperCase()));
+            try {
+                documents = documentService.getDocumentsByType(Document.DocumentType.valueOf(type.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // If invalid type, return all documents and filter later
+                documents = documentService.getAllDocuments();
+            }
+        } else if (uploadDate != null && !uploadDate.isEmpty()) {
+            documents = documentService.getDocumentsByUploadDate(uploadDate);
         } else {
             documents = documentService.getAllDocuments();
+        }
+
+        // Apply additional filters if multiple criteria are provided
+        if (documents != null && !documents.isEmpty()) {
+            if (employeeId != null && type != null && !type.isEmpty()) {
+                documents = documents.stream()
+                        .filter(doc -> doc.getType().toString().equalsIgnoreCase(type))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+            if (employeeId != null && uploadDate != null && !uploadDate.isEmpty()) {
+                List<Document> dateFilteredDocs = documentService.getDocumentsByUploadDate(uploadDate);
+                documents = documents.stream()
+                        .filter(doc -> dateFilteredDocs.stream().anyMatch(d -> d.getId().equals(doc.getId())))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+            if (type != null && !type.isEmpty() && uploadDate != null && !uploadDate.isEmpty()) {
+                List<Document> dateFilteredDocs = documentService.getDocumentsByUploadDate(uploadDate);
+                documents = documents.stream()
+                        .filter(doc -> dateFilteredDocs.stream().anyMatch(d -> d.getId().equals(doc.getId())))
+                        .collect(java.util.stream.Collectors.toList());
+            }
         }
 
         model.addAttribute("documents", documents);
@@ -308,6 +360,7 @@ public class AdminController {
         model.addAttribute("documentTypes", Document.DocumentType.values());
         model.addAttribute("selectedEmployeeId", employeeId);
         model.addAttribute("selectedType", type);
+        model.addAttribute("uploadDate", uploadDate);
 
         return "admin/documents";
     }

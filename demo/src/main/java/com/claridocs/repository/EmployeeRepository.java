@@ -26,10 +26,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     List<Employee> findByDepartmentId(UUID departmentId);
 
-    @Query("SELECT e FROM Employee e JOIN FETCH e.user JOIN FETCH e.department WHERE e.user.name LIKE %:name%")
+    @Query("SELECT e FROM Employee e JOIN FETCH e.user JOIN FETCH e.department WHERE LOWER(e.user.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Employee> findByNameContaining(@Param("name") String name);
 
-    @Query("SELECT e FROM Employee e JOIN FETCH e.user JOIN FETCH e.department WHERE e.department.name LIKE %:departmentName%")
+    @Query("SELECT e FROM Employee e JOIN FETCH e.user JOIN FETCH e.department WHERE LOWER(e.department.name) LIKE LOWER(CONCAT('%', :departmentName, '%'))")
     List<Employee> findByDepartmentNameContaining(@Param("departmentName") String departmentName);
 
     @Query("SELECT e FROM Employee e JOIN FETCH e.user JOIN FETCH e.department WHERE e.dateJoined >= :dateJoined")

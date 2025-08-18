@@ -121,26 +121,42 @@ public class EmployeeController {
 
     @GetMapping("/documents")
     public String documents(Model model, HttpSession session,
-            @RequestParam(required = false) String type) {
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String uploadDate) {
         if (!isEmployee(session)) {
             return "redirect:/auth/login";
         }
 
         Employee employee = getCurrentEmployee(session);
         if (employee != null) {
-            List<Document> documents;
+            List<Document> documents = documentService.getDocumentsByEmployee(employee);
+
+            // Apply filters
             if (type != null && !type.isEmpty()) {
-                Document.DocumentType docType = Document.DocumentType.valueOf(type.toUpperCase());
-                documents = documentService.getDocumentsByEmployee(employee).stream()
-                        .filter(d -> d.getType() == docType)
+                try {
+                    Document.DocumentType docType = Document.DocumentType.valueOf(type.toUpperCase());
+                    documents = documents.stream()
+                            .filter(d -> d.getType() == docType)
+                            .collect(java.util.stream.Collectors.toList());
+                } catch (IllegalArgumentException e) {
+                    // If invalid type, filter by case-insensitive string comparison
+                    documents = documents.stream()
+                            .filter(d -> d.getType().toString().equalsIgnoreCase(type))
+                            .collect(java.util.stream.Collectors.toList());
+                }
+            }
+
+            if (uploadDate != null && !uploadDate.isEmpty()) {
+                List<Document> allDocsByDate = documentService.getDocumentsByUploadDate(uploadDate);
+                documents = documents.stream()
+                        .filter(d -> allDocsByDate.stream().anyMatch(doc -> doc.getId().equals(d.getId())))
                         .collect(java.util.stream.Collectors.toList());
-            } else {
-                documents = documentService.getDocumentsByEmployee(employee);
             }
 
             model.addAttribute("documents", documents);
             model.addAttribute("documentTypes", Document.DocumentType.values());
             model.addAttribute("selectedType", type);
+            model.addAttribute("uploadDate", uploadDate);
         }
 
         return "employee/documents";

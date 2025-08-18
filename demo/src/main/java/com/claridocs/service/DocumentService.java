@@ -19,6 +19,10 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -60,6 +64,57 @@ public class DocumentService {
     public List<Document> getDocumentsByTypeAndDateRange(Document.DocumentType type, Instant startDate,
             Instant endDate) {
         return documentRepository.findByTypeAndUploadedAtBetween(type, startDate, endDate);
+    }
+
+    public List<Document> getDocumentsByUploadDate(String uploadDate) {
+        try {
+            // Parse the date and create start and end of day
+            LocalDate date = LocalDate.parse(uploadDate);
+
+            // Create a 24-hour range to catch all documents from that date
+            // Use system timezone for user-friendly filtering
+            ZoneId userZone = ZoneId.systemDefault();
+            Instant startOfDay = date.atStartOfDay(userZone).toInstant();
+            Instant endOfDay = date.plusDays(1).atStartOfDay(userZone).toInstant();
+
+            return documentRepository.findByUploadedAtBetween(startOfDay, endOfDay);
+        } catch (Exception e) {
+            // Log the error for debugging
+            System.err.println("Error parsing upload date: " + uploadDate + " - " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * More flexible date filtering that handles various date formats and timezone
+     * considerations
+     */
+    public List<Document> getDocumentsByUploadDateFlexible(String uploadDate) {
+        if (uploadDate == null || uploadDate.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        try {
+            // Try to parse as LocalDate first (YYYY-MM-DD format)
+            LocalDate.parse(uploadDate.trim()); // Validate format
+            return getDocumentsByUploadDate(uploadDate.trim());
+        } catch (Exception e1) {
+            try {
+                // Try to parse as LocalDateTime if it includes time
+                LocalDateTime dateTime = LocalDateTime.parse(uploadDate.trim());
+                LocalDate date = dateTime.toLocalDate();
+                return getDocumentsByUploadDate(date.toString());
+            } catch (Exception e2) {
+                // If all parsing fails, fall back to string matching for debugging
+                System.err.println("Could not parse date: " + uploadDate + " - trying string match");
+                return documentRepository.findAll().stream()
+                        .filter(doc -> {
+                            String docDateStr = doc.getUploadedAt().toString();
+                            return docDateStr.contains(uploadDate.trim());
+                        })
+                        .collect(java.util.stream.Collectors.toList());
+            }
+        }
     }
 
     public Document uploadDocument(MultipartFile file, Employee employee, String title, Document.DocumentType type)

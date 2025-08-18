@@ -15,24 +15,29 @@
 <div class="card mb-4">
     <div class="card-body">
         <form method="get" action="/admin/employees" class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="search" class="form-label">Search by Name</label>
-                <input type="text" class="form-control" id="search" name="search" 
+                <input type="text" class="form-control" id="search" name="search"
                        value="${search}" placeholder="Enter employee name">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="departmentId" class="form-label">Filter by Department</label>
                 <select class="form-select" id="departmentId" name="departmentId">
                     <option value="">All Departments</option>
                     <c:forEach var="dept" items="${departments}">
-                        <option value="${dept.id}" 
+                        <option value="${dept.id}"
                                 <c:if test="${dept.id == selectedDepartmentId}">selected</c:if>>
                             ${dept.name}
                         </option>
                     </c:forEach>
                 </select>
             </div>
-            <div class="col-md-4 d-flex align-items-end">
+            <div class="col-md-3">
+                <label for="dateJoined" class="form-label">Date of Joining</label>
+                <input type="date" class="form-control" id="dateJoined" name="dateJoined"
+                       value="${dateJoined}" title="Filter by joining date">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
                 <button type="submit" class="btn btn-outline-primary me-2">
                     <i class="fas fa-search"></i> Search
                 </button>
